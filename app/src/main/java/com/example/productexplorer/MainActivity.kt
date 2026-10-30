@@ -20,6 +20,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -192,6 +193,25 @@ fun ProductHomeScreen(
     ) {
         HomeHeader()
         Spacer(modifier = Modifier.height(24.dp))
+        SearchPreviewBar()
+        Spacer(modifier = Modifier.height(24.dp))
+    }
+}
+
+@Composable
+fun SearchPreviewBar(
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.medium,
+        tonalElevation = 2.dp
+    ) {
+        Text(
+            text = "Rechercher un produit...",
+            modifier = Modifier.padding(16.dp),
+            style = MaterialTheme.typography.bodyMedium
+        )
     }
 }
 
