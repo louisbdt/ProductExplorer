@@ -33,10 +33,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             ProductExplorerTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    ProductDetailScreen(
-                        product = sampleProduct(),
-                        onAddToCartClick = {
-
+                    ProductHomeScreen(
+                        featuredProduct = sampleProduct(),
+                        onFeaturedProductClick = {
+                            // Plus tard : ouvrir le détail du produit
                         },
                         modifier = Modifier.padding(innerPadding)
                     )
@@ -173,6 +173,28 @@ fun ProductDetailScreenOutOfStockPreview() {
         ProductDetailScreen(
             product = sampleProductOutOfStock(),
             onAddToCartClick = {}
+        )
+    }
+}
+
+@Composable
+fun ProductHomeScreen(
+    featuredProduct: ProductUi,
+    onFeaturedProductClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        Text(
+            text = "Product Explorer",
+            style = MaterialTheme.typography.headlineMedium
+        )
+        Text(
+            text = "Découvrez les produits du moment",
+            style = MaterialTheme.typography.bodyMedium
         )
     }
 }
