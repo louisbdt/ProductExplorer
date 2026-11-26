@@ -237,6 +237,19 @@ fun ProductCatalogScreen(
         }
 
         item {
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = { newValue ->
+                    searchQuery = newValue
+                },
+                label = {
+                    Text(text = "Rechercher un produit")
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
+        item {
             CategoryRow(categories = sampleCategories())
         }
 
