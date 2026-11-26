@@ -146,6 +146,8 @@ fun sampleProducts(): List<ProductUi> {
 @Composable
 fun ProductListItem(
     product: ProductUi,
+    isFavorite: Boolean,
+    onFavoriteClick: () -> Unit,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -181,6 +183,15 @@ fun ProductListItem(
             Spacer(modifier = Modifier.height(8.dp))
             Button(onClick = onClick) {
                 Text(text = "Voir le produit")
+            }
+            Button(onClick = onFavoriteClick) {
+                Text(
+                    text = if (isFavorite) {
+                        "Retirer des favoris"
+                    } else {
+                        "Ajouter aux favoris"
+                    }
+                )
             }
         }
     }
@@ -313,6 +324,10 @@ fun ProductCatalogScreen(
         ) { product ->
             ProductListItem(
                 product = product,
+                isFavorite = favoriteProductIds.contains(product.id),
+                onFavoriteClick = {
+                    toggleFavorite(product.id)
+                },
                 onClick = {
                     onProductClick(product)
                 }
