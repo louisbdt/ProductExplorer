@@ -11,6 +11,7 @@ data class ProductCatalogUiState(
     val categories: List<String> = emptyList(),
     val searchQuery: String = "",
     val showOnlyInStock: Boolean = false,
+    val showOnlyFavorites: Boolean = false,
     val favoriteProductIds: List<Int> = emptyList()
 )
 
@@ -27,7 +28,12 @@ class ProductCatalogViewModel : ViewModel() {
     )
     val uiState: StateFlow<ProductCatalogUiState> = _uiState.asStateFlow()
 
-    private fun filterProducts(searchQuery: String, showOnlyInStock: Boolean): List<ProductUi> {
+    private fun filterProducts(
+        searchQuery: String,
+        showOnlyInStock: Boolean,
+        showOnlyFavorites: Boolean,
+        favoriteProductIds: List<Int>
+    ): List<ProductUi> {
         return allProducts.filter { product ->
             val matchesSearch =
                 product.title.contains(searchQuery, ignoreCase = true) ||
@@ -37,7 +43,10 @@ class ProductCatalogViewModel : ViewModel() {
             val matchesStock =
                 !showOnlyInStock || product.stock > 0
 
-            matchesSearch && matchesStock
+            val matchesFavorite =
+                !showOnlyFavorites || favoriteProductIds.contains(product.id)
+
+            matchesSearch && matchesStock && matchesFavorite
         }
     }
 
@@ -47,7 +56,9 @@ class ProductCatalogViewModel : ViewModel() {
                 searchQuery = newValue,
                 products = filterProducts(
                     searchQuery = newValue,
-                    showOnlyInStock = currentState.showOnlyInStock
+                    showOnlyInStock = currentState.showOnlyInStock,
+                    showOnlyFavorites = currentState.showOnlyFavorites,
+                    favoriteProductIds = currentState.favoriteProductIds
                 )
             )
         }
@@ -61,7 +72,25 @@ class ProductCatalogViewModel : ViewModel() {
                 showOnlyInStock = newShowOnlyInStock,
                 products = filterProducts(
                     searchQuery = currentState.searchQuery,
-                    showOnlyInStock = newShowOnlyInStock
+                    showOnlyInStock = newShowOnlyInStock,
+                    showOnlyFavorites = currentState.showOnlyFavorites,
+                    favoriteProductIds = currentState.favoriteProductIds
+                )
+            )
+        }
+    }
+
+    fun onToggleFavoritesFilter() {
+        _uiState.update { currentState ->
+            val newShowOnlyFavorites = !currentState.showOnlyFavorites
+
+            currentState.copy(
+                showOnlyFavorites = newShowOnlyFavorites,
+                products = filterProducts(
+                    searchQuery = currentState.searchQuery,
+                    showOnlyInStock = currentState.showOnlyInStock,
+                    showOnlyFavorites = newShowOnlyFavorites,
+                    favoriteProductIds = currentState.favoriteProductIds
                 )
             )
         }
@@ -77,7 +106,13 @@ class ProductCatalogViewModel : ViewModel() {
                 }
 
             currentState.copy(
-                favoriteProductIds = newFavoriteIds
+                favoriteProductIds = newFavoriteIds,
+                products = filterProducts(
+                    searchQuery = currentState.searchQuery,
+                    showOnlyInStock = currentState.showOnlyInStock,
+                    showOnlyFavorites = currentState.showOnlyFavorites,
+                    favoriteProductIds = newFavoriteIds
+                )
             )
         }
     }

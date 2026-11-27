@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,15 +13,21 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -42,6 +49,8 @@ fun ProductCatalogContainer(
         onSearchQueryChange = viewModel::onSearchQueryChange,
         showOnlyInStock = uiState.showOnlyInStock,
         onToggleStockFilter = viewModel::onToggleStockFilter,
+        showOnlyFavorites = uiState.showOnlyFavorites,
+        onToggleFavoritesFilter = viewModel::onToggleFavoritesFilter,
         favoriteProductIds = uiState.favoriteProductIds,
         onFavoriteClick = viewModel::onFavoriteClick,
         onProductClick = onProductClick,
@@ -57,6 +66,8 @@ fun ProductCatalogScreen(
     onSearchQueryChange: (String) -> Unit,
     showOnlyInStock: Boolean,
     onToggleStockFilter: () -> Unit,
+    showOnlyFavorites: Boolean,
+    onToggleFavoritesFilter: () -> Unit,
     favoriteProductIds: List<Int>,
     onFavoriteClick: (Int) -> Unit,
     onProductClick: (ProductUi) -> Unit,
@@ -97,13 +108,29 @@ fun ProductCatalogScreen(
 
         item {
             Button(
-                onClick = onToggleStockFilter
+                onClick = onToggleStockFilter,
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
                     text = if (showOnlyInStock) {
                         "Afficher tous les produits"
                     } else {
                         "Afficher uniquement les produits en stock"
+                    }
+                )
+            }
+        }
+
+        item {
+            Button(
+                onClick = onToggleFavoritesFilter,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = if (showOnlyFavorites) {
+                        "Afficher tous les produits"
+                    } else {
+                        "Afficher uniquement les favoris"
                     }
                 )
             }
@@ -152,6 +179,8 @@ fun ProductCatalogScreenLightPreview() {
             onSearchQueryChange = {},
             showOnlyInStock = false,
             onToggleStockFilter = {},
+            showOnlyFavorites = false,
+            onToggleFavoritesFilter = {},
             favoriteProductIds = listOf(1),
             onFavoriteClick = {},
             onProductClick = {}
@@ -173,6 +202,8 @@ fun ProductCatalogScreenDarkPreview() {
             onSearchQueryChange = {},
             showOnlyInStock = true,
             onToggleStockFilter = {},
+            showOnlyFavorites = false,
+            onToggleFavoritesFilter = {},
             favoriteProductIds = listOf(2),
             onFavoriteClick = {},
             onProductClick = {}
@@ -201,11 +232,23 @@ fun ProductListItem(
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            Text(
-                text = product.title,
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onSurface
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = product.title,
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.weight(1f)
+                )
+                IconButton(onClick = onFavoriteClick) {
+                    Icon(
+                        imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                        contentDescription = if (isFavorite) "Retirer des favoris" else "Ajouter aux favoris",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
             Text(
                 text = product.brand,
                 style = MaterialTheme.typography.bodyMedium,
@@ -218,17 +261,11 @@ fun ProductListItem(
                 color = MaterialTheme.colorScheme.primary
             )
             Spacer(modifier = Modifier.height(8.dp))
-            Button(onClick = onClick) {
+            Button(
+                onClick = onClick,
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 Text(text = "Voir le produit")
-            }
-            Button(onClick = onFavoriteClick) {
-                Text(
-                    text = if (isFavorite) {
-                        "Retirer des favoris"
-                    } else {
-                        "Ajouter aux favoris"
-                    }
-                )
             }
         }
     }
