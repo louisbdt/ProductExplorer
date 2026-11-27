@@ -6,12 +6,19 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
+enum class SortOption(val label: String) {
+    NONE("Aucun tri"),
+    PRICE_ASCENDING("Prix croissant"),
+    PRICE_DESCENDING("Prix décroissant")
+}
+
 data class ProductCatalogUiState(
     val products: List<ProductUi> = emptyList(),
     val categories: List<String> = emptyList(),
     val searchQuery: String = "",
     val showOnlyInStock: Boolean = false,
     val showOnlyFavorites: Boolean = false,
+    val sortOption: SortOption = SortOption.NONE,
     val favoriteProductIds: List<Int> = emptyList()
 )
 
@@ -32,9 +39,10 @@ class ProductCatalogViewModel : ViewModel() {
         searchQuery: String,
         showOnlyInStock: Boolean,
         showOnlyFavorites: Boolean,
-        favoriteProductIds: List<Int>
+        favoriteProductIds: List<Int>,
+        sortOption: SortOption
     ): List<ProductUi> {
-        return allProducts.filter { product ->
+        val filtered = allProducts.filter { product ->
             val matchesSearch =
                 product.title.contains(searchQuery, ignoreCase = true) ||
                     product.brand.contains(searchQuery, ignoreCase = true) ||
@@ -48,6 +56,12 @@ class ProductCatalogViewModel : ViewModel() {
 
             matchesSearch && matchesStock && matchesFavorite
         }
+
+        return when (sortOption) {
+            SortOption.NONE -> filtered
+            SortOption.PRICE_ASCENDING -> filtered.sortedBy { product -> product.price }
+            SortOption.PRICE_DESCENDING -> filtered.sortedByDescending { product -> product.price }
+        }
     }
 
     fun onSearchQueryChange(newValue: String) {
@@ -58,7 +72,8 @@ class ProductCatalogViewModel : ViewModel() {
                     searchQuery = newValue,
                     showOnlyInStock = currentState.showOnlyInStock,
                     showOnlyFavorites = currentState.showOnlyFavorites,
-                    favoriteProductIds = currentState.favoriteProductIds
+                    favoriteProductIds = currentState.favoriteProductIds,
+                    sortOption = currentState.sortOption
                 )
             )
         }
@@ -74,7 +89,8 @@ class ProductCatalogViewModel : ViewModel() {
                     searchQuery = currentState.searchQuery,
                     showOnlyInStock = newShowOnlyInStock,
                     showOnlyFavorites = currentState.showOnlyFavorites,
-                    favoriteProductIds = currentState.favoriteProductIds
+                    favoriteProductIds = currentState.favoriteProductIds,
+                    sortOption = currentState.sortOption
                 )
             )
         }
@@ -90,7 +106,23 @@ class ProductCatalogViewModel : ViewModel() {
                     searchQuery = currentState.searchQuery,
                     showOnlyInStock = currentState.showOnlyInStock,
                     showOnlyFavorites = newShowOnlyFavorites,
-                    favoriteProductIds = currentState.favoriteProductIds
+                    favoriteProductIds = currentState.favoriteProductIds,
+                    sortOption = currentState.sortOption
+                )
+            )
+        }
+    }
+
+    fun onSortOptionChange(newSortOption: SortOption) {
+        _uiState.update { currentState ->
+            currentState.copy(
+                sortOption = newSortOption,
+                products = filterProducts(
+                    searchQuery = currentState.searchQuery,
+                    showOnlyInStock = currentState.showOnlyInStock,
+                    showOnlyFavorites = currentState.showOnlyFavorites,
+                    favoriteProductIds = currentState.favoriteProductIds,
+                    sortOption = newSortOption
                 )
             )
         }
@@ -111,7 +143,8 @@ class ProductCatalogViewModel : ViewModel() {
                     searchQuery = currentState.searchQuery,
                     showOnlyInStock = currentState.showOnlyInStock,
                     showOnlyFavorites = currentState.showOnlyFavorites,
-                    favoriteProductIds = newFavoriteIds
+                    favoriteProductIds = newFavoriteIds,
+                    sortOption = currentState.sortOption
                 )
             )
         }
